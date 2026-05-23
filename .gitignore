@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# env & secrets
+.env
+.env.local
+.env*.local
+
+# vercel
+.vercel
+
+# pdfs (local only)
+pdfs/
+
+# misc junk
+.DS_Store
+*.log
+.claude/
+
+# safety: prevent nested copies
+ds-academy/
+ds-academy-clean/
+
+texts

@@ -1,0 +1,295 @@
+@import "tailwindcss";
+
+:root {
+  --background: 8 8 20;
+  --foreground: 240 240 255;
+  --accent-cyan: 0 229 255;
+  --accent-violet: 168 85 247;
+}
+
+* {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body {
+  background: rgb(var(--background));
+  color: rgb(var(--foreground));
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(168, 85, 247, 0.15),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(0, 229, 255, 0.12),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(99, 102, 241, 0.08),
+      transparent 70%
+    );
+  background-attachment: fixed;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+}
+
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, rgb(0, 229, 255), rgb(168, 85, 247));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glow-cyan {
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.15);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.prose-chat p {
+  margin: 0.5rem 0;
+}
+.prose-chat p:first-child {
+  margin-top: 0;
+}
+.prose-chat p:last-child {
+  margin-bottom: 0;
+}
+.prose-chat strong {
+  color: rgb(0, 229, 255);
+  font-weight: 600;
+}
+.prose-chat em {
+  color: rgb(192, 132, 252);
+  font-style: italic;
+}
+.prose-chat ul,
+.prose-chat ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+.prose-chat ul {
+  list-style: disc;
+}
+.prose-chat ol {
+  list-style: decimal;
+}
+.prose-chat li {
+  margin: 0.25rem 0;
+}
+.prose-chat h1,
+.prose-chat h2,
+.prose-chat h3 {
+  font-weight: 600;
+  margin: 0.75rem 0 0.5rem;
+  color: rgb(240, 240, 255);
+}
+.prose-chat h1 {
+  font-size: 1.15rem;
+}
+.prose-chat h2 {
+  font-size: 1.05rem;
+}
+.prose-chat h3 {
+  font-size: 1rem;
+}
+.prose-chat code {
+  background: rgba(0, 229, 255, 0.1);
+  color: rgb(0, 229, 255);
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-family: ui-monospace, monospace;
+}
+.prose-chat pre {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+.prose-chat pre code {
+  background: transparent;
+  color: rgb(240, 240, 255);
+  padding: 0;
+}
+.prose-chat blockquote {
+  border-left: 3px solid rgb(168, 85, 247);
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  color: rgb(200, 200, 220);
+}
+
+@keyframes slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-in-up {
+  animation: slide-in-up 0.4s ease-out;
+}
+
+/* Mobile-friendly scrollbars */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+}
+
+/* Touch-friendly minimum tap targets */
+button,
+a {
+  min-height: 36px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent text from being selectable on UI chrome */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Mobile-optimized markdown */
+@media (max-width: 640px) {
+  .prose-chat {
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  .prose-chat h1 {
+    font-size: 1.05rem;
+    margin: 1rem 0 0.5rem;
+  }
+  .prose-chat h2 {
+    font-size: 1rem;
+    margin: 0.875rem 0 0.4rem;
+  }
+  .prose-chat h3 {
+    font-size: 0.95rem;
+    margin: 0.75rem 0 0.35rem;
+  }
+  .prose-chat h4 {
+    font-size: 0.875rem;
+    margin: 0.6rem 0 0.3rem;
+  }
+  .prose-chat p {
+    margin: 0.4rem 0;
+  }
+  .prose-chat ul,
+  .prose-chat ol {
+    padding-left: 1.1rem;
+    margin: 0.5rem 0;
+  }
+  .prose-chat li {
+    margin: 0.2rem 0;
+  }
+  .prose-chat pre {
+    padding: 0.5rem;
+    font-size: 0.7rem;
+    margin: 0.5rem 0;
+    border-radius: 0.4rem;
+  }
+  .prose-chat code {
+    font-size: 0.78em;
+    padding: 0.05rem 0.3rem;
+  }
+  .prose-chat blockquote {
+    padding-left: 0.5rem;
+    margin: 0.4rem 0;
+  }
+}
+
+/* Smooth tap feedback */
+.glass-hover:active {
+  transform: scale(0.98);
+  transition: transform 0.1s;
+}
+
+/* Line clamp helper */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.prose-chat pre {
+  overflow-x: auto;
+  max-width: 100%;
+  white-space: pre;
+  word-wrap: normal;
+}
+
+.prose-chat pre code {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* Inline code wraps on mobile */
+.prose-chat :not(pre) > code {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.prose-chat {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+.prose-chat * {
+  max-width: 100%;
+}
+
+.prose-chat p,
+.prose-chat li {
+  overflow-wrap: break-word;
+}
+
+.prose-chat table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  max-width: 100%;
+  font-size: 0.85em;
+}
+.prose-chat th,
+.prose-chat td {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+}
