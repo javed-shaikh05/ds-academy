@@ -26,3 +26,7 @@ ds-academy/
 ds-academy-clean/
 
 texts
+
+*.rar
+*.zip
+ds-academy.rar

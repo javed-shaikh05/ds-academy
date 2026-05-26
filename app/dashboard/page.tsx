@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import LogoutButton from "./LogoutButton";
 import DailyMissions from "./DailyMissions";
 import Link from "next/link";
+import TodaysPlan from "./TodaysPlan";
+import OnboardingModal from "@/components/OnboardingModal";
 import {
   BookOpen,
   Brain,
@@ -76,6 +78,9 @@ export default async function Dashboard() {
             <LogoutButton />
           </div>
         </div>
+
+        {/* Personalized plan */}
+        <TodaysPlan />
 
         {/* Rank card */}
         <div className="glass p-4 sm:p-6 mb-4 sm:mb-6 bg-linear-to-br from-cyan-500/10 to-violet-500/10">
@@ -205,6 +210,7 @@ export default async function Dashboard() {
           </>
         )}
       </div>
+      <OnboardingModal />
     </main>
   );
 }
