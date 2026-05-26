@@ -44,7 +44,7 @@ export default function AnalyticsView() {
     fetch("/api/analytics")
       .then((r) => r.json())
       .then((d) => {
-        setData(d);
+        if (!d.error) setData(d);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -58,7 +58,7 @@ export default function AnalyticsView() {
     );
   }
 
-  if (!data || data.error) {
+  if (!data) {
     return (
       <main className="min-h-screen max-w-4xl mx-auto px-4 py-8">
         <p className="text-red-400 text-sm">Could not load analytics.</p>
