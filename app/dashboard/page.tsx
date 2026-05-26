@@ -15,6 +15,7 @@ import {
   Zap,
   TrendingUp,
   FileCode,
+  FileText,
 } from "lucide-react";
 import { getRank, progressToNextLevel } from "@/lib/gamification/levels";
 import { BADGES } from "@/lib/gamification/badges";
@@ -69,6 +70,13 @@ export default async function Dashboard() {
             </h1>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              href="/revision"
+              className="glass glass-hover px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1.5 transition shrink-0"
+            >
+              <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-violet-400" />
+              <span className="hidden sm:inline">Revise</span>
+            </Link>
             <Link
               href="/pulse"
               className="glass glass-hover px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1.5 transition shrink-0"

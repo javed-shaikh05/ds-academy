@@ -10,11 +10,12 @@ import {
   CheckCircle2,
   Loader2,
   Sparkles,
+  Dumbbell,
+  FileText,
 } from "lucide-react";
 import { showXP } from "@/components/XPToast";
-import InlineQuiz from '@/components/InlineQuiz'
-import MiniPlayground from '@/components/MiniPlayground'
-import { Dumbbell } from 'lucide-react'
+import InlineQuiz from "@/components/InlineQuiz";
+import MiniPlayground from "@/components/MiniPlayground";
 
 interface Props {
   subtopic: any;
@@ -31,10 +32,13 @@ export default function LessonView({
 }: Props) {
   const [content, setContent] = useState<string | null>(null);
   const [sources, setSources] = useState<any[]>([]);
-  const [exercise, setExercise] = useState('')
+  const [exercise, setExercise] = useState("");
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState(initialStatus);
   const [marking, setMarking] = useState(false);
+  const [cheatSheet, setCheatSheet] = useState("");
+  const [cheatLoading, setCheatLoading] = useState(false);
+  const [showCheat, setShowCheat] = useState(false);
 
   useEffect(() => {
     if (status === "not_started") {
@@ -56,14 +60,31 @@ export default function LessonView({
       if (data.error) {
         setContent(`Error: ${data.error}`);
       } else {
-        setContent(data.content)
-setSources(data.sources || [])
-setExercise(data.exercise || '')
+        setContent(data.content);
+        setSources(data.sources || []);
+        setExercise(data.exercise || "");
       }
     } catch (err: any) {
       setContent(`Error: ${err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCheatSheet = async () => {
+    setShowCheat(true);
+    if (cheatSheet) return; // already loaded
+    setCheatLoading(true);
+    try {
+      const res = await fetch("/api/cheatsheet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subtopicId: subtopic.id }),
+      });
+      const data = await res.json();
+      setCheatSheet(data.content || "Could not generate cheat sheet.");
+    } finally {
+      setCheatLoading(false);
     }
   };
 
@@ -126,6 +147,12 @@ setExercise(data.exercise || '')
           {subtopic.title}
         </h1>
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <button
+            onClick={loadCheatSheet}
+            className="text-[10px] sm:text-xs text-violet-300 bg-violet-500/10 border border-violet-400/20 px-2 py-0.5 sm:py-1 rounded-md flex items-center gap-1 hover:bg-violet-500/20 transition"
+          >
+            <FileText className="w-3 h-3" /> Cheat sheet
+          </button>
           <span
             className={`text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-md border ${diffColor}`}
           >
@@ -154,22 +181,24 @@ setExercise(data.exercise || '')
       </div>
 
       {/* PRACTICE SECTION */}
-{!loading && content && (
-  <div className="mb-4 sm:mb-6">
-    <div className="flex items-center gap-2 mb-3 px-1">
-      <Dumbbell className="w-5 h-5 text-cyan-400" />
-      <h2 className="text-base sm:text-lg font-semibold">Practice what you learned</h2>
-    </div>
+      {!loading && content && (
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <Dumbbell className="w-5 h-5 text-cyan-400" />
+            <h2 className="text-base sm:text-lg font-semibold">
+              Practice what you learned
+            </h2>
+          </div>
 
-    <div className="space-y-3">
-      {/* Inline quiz — always available */}
-      <InlineQuiz subtopicId={subtopic.id} />
+          <div className="space-y-3">
+            {/* Inline quiz — always available */}
+            <InlineQuiz subtopicId={subtopic.id} />
 
-      {/* Python exercise — only if the topic generated one */}
-      {exercise && <MiniPlayground starterCode={exercise} />}
-    </div>
-  </div>
-)}
+            {/* Python exercise — only if the topic generated one */}
+            {exercise && <MiniPlayground starterCode={exercise} />}
+          </div>
+        </div>
+      )}
 
       {/* Mark complete */}
       {!loading && content && (
@@ -242,6 +271,43 @@ setExercise(data.exercise || '')
           </Link>
         )}
       </div>
+      {/* Cheat sheet modal */}
+      {showCheat && (
+        <div
+          className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowCheat(false)}
+        >
+          <div
+            className="glass glow-cyan p-5 sm:p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-violet-400" />
+                <h3 className="font-semibold">Quick Revision</h3>
+              </div>
+              <button
+                onClick={() => setShowCheat(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {cheatLoading ? (
+              <div className="flex items-center justify-center py-10 text-gray-400">
+                <Loader2 className="w-5 h-5 animate-spin mr-2" /> Building cheat
+                sheet...
+              </div>
+            ) : (
+              <div className="prose-chat text-sm">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {cheatSheet}
+                </ReactMarkdown>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
