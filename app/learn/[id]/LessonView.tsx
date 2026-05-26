@@ -12,6 +12,7 @@ import {
   Sparkles,
   Dumbbell,
   FileText,
+  X,
 } from "lucide-react";
 import { showXP } from "@/components/XPToast";
 import InlineQuiz from "@/components/InlineQuiz";
