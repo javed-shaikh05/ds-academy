@@ -29,3 +29,18 @@ self.addEventListener("fetch", (e) => {
       .catch(() => caches.match(e.request)),
   );
 });
+// Handle notification clicks — open the app
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = event.notification.data?.url || '/dashboard'
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then((clientList) => {
+      // Focus existing window if open
+      for (const client of clientList) {
+        if (client.url.includes(url) && 'focus' in client) return client.focus()
+      }
+      // Otherwise open new
+      if (self.clients.openWindow) return self.clients.openWindow(url)
+    })
+  )
+})

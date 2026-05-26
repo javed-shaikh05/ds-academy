@@ -4,6 +4,11 @@ import LogoutButton from "./LogoutButton";
 import DailyMissions from "./DailyMissions";
 import Link from "next/link";
 import TodaysPlan from "./TodaysPlan";
+<<<<<<< HEAD
+=======
+import NotificationSettings from "@/components/NotificationSettings";
+import DailyReminderCheck from "@/components/DailyReminderCheck";
+>>>>>>> 48732c3 (Add daily reminder notifications)
 import OnboardingModal from "@/components/OnboardingModal";
 import {
   BookOpen,
@@ -54,6 +59,13 @@ export default async function Dashboard() {
     .select("badge_id")
     .eq("user_id", user.id);
 
+  const today = new Date().toISOString().split("T")[0];
+  const { count: reviewsDue } = await supabase
+    .from("mcq_reviews")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .lte("due_date", today);
+
   const earnedIds = new Set(earnedBadges?.map((b) => b.badge_id) || []);
   const recentBadges = BADGES.filter((b) => earnedIds.has(b.id)).slice(0, 4);
 
@@ -86,6 +98,16 @@ export default async function Dashboard() {
               <span className="hidden sm:inline">Pulse</span>
             </Link>
             <Link
+<<<<<<< HEAD
+=======
+              href="/skilltree"
+              className="glass glass-hover px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1.5 transition shrink-0"
+            >
+              <Network className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
+              <span className="hidden sm:inline">Tree</span>
+            </Link>
+            <Link
+>>>>>>> 48732c3 (Add daily reminder notifications)
               href="/analytics"
               className="glass glass-hover px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1.5 transition shrink-0"
             >
@@ -148,7 +170,7 @@ export default async function Dashboard() {
             icon={Flame}
             color="text-orange-400"
             label="Streak"
-            value={`${streak}${streak === 1 ? "d" : "d"}`}
+            value={`${streak}d`}
           />
           <StatCard
             icon={Trophy}
@@ -194,7 +216,6 @@ export default async function Dashboard() {
             gradient="from-pink-500/20"
             ready
           />
-
           <ActionCard
             href="/practice"
             icon={Code2}
@@ -227,7 +248,7 @@ export default async function Dashboard() {
             <h2 className="text-base sm:text-xl font-semibold mb-3">
               Recent badges
             </h2>
-            <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
+            <div className="grid grid-cols-4 gap-2.5 sm:gap-3 mb-6">
               {recentBadges.map((b) => (
                 <div key={b.id} className="glass p-3 sm:p-4 text-center">
                   <div className="text-2xl sm:text-3xl mb-1.5 sm:mb-2">
@@ -241,8 +262,17 @@ export default async function Dashboard() {
             </div>
           </>
         )}
+
+        {/* Notification settings */}
+        <NotificationSettings />
       </div>
+<<<<<<< HEAD
       <OnboardingModal />
+=======
+
+      <OnboardingModal />
+      <DailyReminderCheck streak={streak} reviewsDue={reviewsDue ?? 0} />
+>>>>>>> 48732c3 (Add daily reminder notifications)
     </main>
   );
 }
@@ -273,7 +303,7 @@ function ActionCard({ href, icon: Icon, title, desc, gradient, ready }: any) {
     </>
   );
 
-  const baseClasses = `glass p-4 sm:p-6 bg-gradient-to-br ${gradient} to-transparent block h-full`;
+  const baseClasses = `glass p-4 sm:p-6 bg-linear-to-br ${gradient} to-transparent block h-full`;
 
   if (!ready) {
     return (
