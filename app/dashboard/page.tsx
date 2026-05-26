@@ -70,6 +70,13 @@ export default async function Dashboard() {
           </div>
           <div className="flex items-center gap-2">
             <Link
+              href="/pulse"
+              className="glass glass-hover px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1.5 transition shrink-0"
+            >
+              <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-400" />
+              <span className="hidden sm:inline">Pulse</span>
+            </Link>
+            <Link
               href="/analytics"
               className="glass glass-hover px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1.5 transition shrink-0"
             >
