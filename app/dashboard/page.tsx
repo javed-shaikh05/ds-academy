@@ -14,6 +14,7 @@ import {
   Award,
   Zap,
   TrendingUp,
+  FileCode,
 } from "lucide-react";
 import { getRank, progressToNextLevel } from "@/lib/gamification/levels";
 import { BADGES } from "@/lib/gamification/badges";
@@ -185,6 +186,14 @@ export default async function Dashboard() {
             title="Interview"
             desc="Mock FAANG rounds"
             gradient="from-pink-500/20"
+            ready
+          />
+          <ActionCard
+            href="/project"
+            icon={FileCode}
+            title="Project Lab"
+            desc="Review & viva"
+            gradient="from-green-500/20"
             ready
           />
         </div>
