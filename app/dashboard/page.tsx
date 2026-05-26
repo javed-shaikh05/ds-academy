@@ -4,11 +4,8 @@ import LogoutButton from "./LogoutButton";
 import DailyMissions from "./DailyMissions";
 import Link from "next/link";
 import TodaysPlan from "./TodaysPlan";
-<<<<<<< HEAD
-=======
 import NotificationSettings from "@/components/NotificationSettings";
 import DailyReminderCheck from "@/components/DailyReminderCheck";
->>>>>>> 48732c3 (Add daily reminder notifications)
 import OnboardingModal from "@/components/OnboardingModal";
 import {
   BookOpen,
@@ -98,8 +95,6 @@ export default async function Dashboard() {
               <span className="hidden sm:inline">Pulse</span>
             </Link>
             <Link
-<<<<<<< HEAD
-=======
               href="/skilltree"
               className="glass glass-hover px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1.5 transition shrink-0"
             >
@@ -107,7 +102,7 @@ export default async function Dashboard() {
               <span className="hidden sm:inline">Tree</span>
             </Link>
             <Link
->>>>>>> 48732c3 (Add daily reminder notifications)
+
               href="/analytics"
               className="glass glass-hover px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1.5 transition shrink-0"
             >
@@ -266,13 +261,9 @@ export default async function Dashboard() {
         {/* Notification settings */}
         <NotificationSettings />
       </div>
-<<<<<<< HEAD
       <OnboardingModal />
-=======
-
       <OnboardingModal />
       <DailyReminderCheck streak={streak} reviewsDue={reviewsDue ?? 0} />
->>>>>>> 48732c3 (Add daily reminder notifications)
     </main>
   );
 }
