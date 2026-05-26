@@ -11,8 +11,33 @@ import {
   Award,
 } from "lucide-react";
 
+interface SkillPhase {
+  phase: string;
+  completed: number;
+  total: number;
+  pct: number;
+}
+
+interface WeakTopic {
+  title: string;
+  accuracy: number;
+}
+
+interface AnalyticsData {
+  xpByDay: Record<string, number>;
+  readiness: number;
+  stats: {
+    lessonsCompleted: number;
+    totalLessons: number;
+    interviewsTaken: number;
+    avgInterviewScore: number;
+  };
+  skillGraph: SkillPhase[];
+  weakTopics: WeakTopic[];
+}
+
 export default function AnalyticsView() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -157,7 +182,7 @@ export default function AnalyticsView() {
           <h2 className="font-semibold">Skill Progress by Phase</h2>
         </div>
         <div className="space-y-3">
-          {data.skillGraph.map((s: any) => (
+          {data.skillGraph.map((s) => (
             <div key={s.phase}>
               <div className="flex justify-between text-xs sm:text-sm mb-1">
                 <span className="text-gray-300 truncate">{s.phase}</span>
@@ -188,7 +213,7 @@ export default function AnalyticsView() {
           </p>
         ) : (
           <div className="space-y-2">
-            {data.weakTopics.map((t: any, i: number) => (
+            {data.weakTopics.map((t, i) => (
               <div key={i} className="flex items-center justify-between gap-3">
                 <span className="text-sm text-gray-300 truncate">
                   {t.title}
