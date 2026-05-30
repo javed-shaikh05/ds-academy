@@ -186,7 +186,7 @@ export default async function Dashboard() {
         <h2 className="text-base sm:text-xl font-semibold mb-3 mt-6 sm:mt-8">
           Continue your journey
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 mb-6">
           <ActionCard
             href="/learn"
             icon={BookOpen}
@@ -225,6 +225,14 @@ export default async function Dashboard() {
             title="Project Lab"
             desc="Review & viva"
             gradient="from-green-500/20"
+            ready
+          />
+          <ActionCard
+            href="/resume"
+            icon={FileText}
+            title="Resume"
+            desc="AI review & ATS score"
+            gradient="from-orange-500/20"
             ready
           />
         </div>

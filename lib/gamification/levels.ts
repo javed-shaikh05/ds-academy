@@ -78,4 +78,5 @@ export const XP_REWARDS = {
   mcq_correct: 10,
   interview_complete: 100,
   project_review: 60,
+  resume_review: 40,
 };
