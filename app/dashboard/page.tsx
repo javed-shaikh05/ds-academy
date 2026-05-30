@@ -7,6 +7,7 @@ import TodaysPlan from "./TodaysPlan";
 import NotificationSettings from "@/components/NotificationSettings";
 import DailyReminderCheck from "@/components/DailyReminderCheck";
 import OnboardingModal from "@/components/OnboardingModal";
+import ProfileAvatar from '@/components/ProfileAvatar'
 import {
   BookOpen,
   Brain,
@@ -66,19 +67,22 @@ export default async function Dashboard() {
   const earnedIds = new Set(earnedBadges?.map((b) => b.badge_id) || []);
   const recentBadges = BADGES.filter((b) => earnedIds.has(b.id)).slice(0, 4);
 
-  const name = user.email?.split("@")[0] ?? "Learner";
+  const name = stats?.display_name || user.email?.split("@")[0] || "Learner";
 
   return (
     <main className="min-h-screen pb-24 sm:pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-5 sm:mb-8 gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs text-gray-400">Welcome back,</p>
-            <h1 className="text-xl sm:text-3xl font-bold capitalize truncate">
-              {name} <span className="inline-block">👋</span>
-            </h1>
-          </div>
+          <Link href="/profile" className="flex items-center gap-3 min-w-0 flex-1 group">
+            <ProfileAvatar url={stats?.avatar_url} name={name} size={48} level={rank.level} />
+            <div className="min-w-0">
+              <p className="text-xs text-gray-400">Welcome back,</p>
+              <h1 className="text-lg sm:text-2xl font-bold capitalize truncate group-hover:text-cyan-300 transition">
+                {name}
+              </h1>
+            </div>
+          </Link>
           <div className="flex items-center gap-2">
             <Link
               href="/revision"
