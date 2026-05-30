@@ -102,19 +102,11 @@ export default async function Dashboard() {
               <span className="hidden sm:inline">Tree</span>
             </Link>
             <Link
-
               href="/analytics"
               className="glass glass-hover px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1.5 transition shrink-0"
             >
               <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Analytics</span>
-            </Link>
-            <Link
-              href="/skilltree"
-              className="glass glass-hover px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1.5 transition shrink-0"
-            >
-              <Network className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
-              <span className="hidden sm:inline">Tree</span>
             </Link>
             <LogoutButton />
           </div>
@@ -261,7 +253,6 @@ export default async function Dashboard() {
         {/* Notification settings */}
         <NotificationSettings />
       </div>
-      <OnboardingModal />
       <OnboardingModal />
       <DailyReminderCheck streak={streak} reviewsDue={reviewsDue ?? 0} />
     </main>
