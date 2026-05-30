@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import ProfileAvatar from '@/components/ProfileAvatar'
+import AvatarPicker from '@/components/AvatarPicker'
 
 interface Props {
     email: string
@@ -22,7 +23,7 @@ interface Props {
 export default function ProfileView({ email, displayName, avatarUrl, stats, badges, counts }: Props) {
     const router = useRouter()
     const supabase = createClient()
-    const fileInputRef = useRef<HTMLInputElement>(null)
+
 
     const [name, setName] = useState(displayName)
     const [avatar, setAvatar] = useState(avatarUrl)
@@ -34,6 +35,7 @@ export default function ProfileView({ email, displayName, avatarUrl, stats, badg
     const [pwdMsg, setPwdMsg] = useState('')
 
     const [uploading, setUploading] = useState(false)
+    const [showPicker, setShowPicker] = useState(false)
 
     const [resetting, setResetting] = useState(false)
     const [showResetConfirm, setShowResetConfirm] = useState(false)
@@ -71,6 +73,25 @@ export default function ProfileView({ email, displayName, avatarUrl, stats, badg
         else { setPwdMsg('✓ Password updated'); setNewPassword(''); setTimeout(() => setPwdMsg(''), 3000) }
     }
 
+    const setAvatarUrl = async (url: string | null) => {
+        await fetch('/api/profile/avatar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ avatar_url: url }),
+        })
+        setAvatar(url)
+    }
+
+    const pickPreloaded = async (url: string) => {
+        setUploading(true)
+        try {
+            await setAvatarUrl(url)
+            setShowPicker(false)
+        } finally {
+            setUploading(false)
+        }
+    }
+
     const uploadAvatar = async (file: File) => {
         if (file.size > 2 * 1024 * 1024) { alert('Image must be under 2 MB'); return }
         setUploading(true)
@@ -85,13 +106,29 @@ export default function ProfileView({ email, displayName, avatarUrl, stats, badg
             if (error) { alert(`Upload failed: ${error.message}`); return }
 
             const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath)
+            await setAvatarUrl(publicUrl)
+            setShowPicker(false)
+        } finally {
+            setUploading(false)
+        }
+    }
 
-            await fetch('/api/profile/avatar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ avatar_url: publicUrl }),
-            })
-            setAvatar(publicUrl)
+    const removeAvatar = async () => {
+        setUploading(true)
+        try {
+            // If it's a Supabase-uploaded file, delete it from storage too
+            if (avatar && avatar.includes('/avatars/')) {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                    // Extract path after /avatars/
+                    const parts = avatar.split('/avatars/')
+                    if (parts[1]) {
+                        await supabase.storage.from('avatars').remove([parts[1]])
+                    }
+                }
+            }
+            await setAvatarUrl(null)
+            setShowPicker(false)
         } finally {
             setUploading(false)
         }
@@ -146,20 +183,13 @@ export default function ProfileView({ email, displayName, avatarUrl, stats, badg
 
                 {/* Camera button */}
                 <button
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => setShowPicker(true)}
                     disabled={uploading}
                     className="absolute top-5 right-5 sm:top-6 sm:right-6 glass glass-hover p-2 rounded-full transition disabled:opacity-50"
                     aria-label="Change avatar"
                 >
                     {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
                 </button>
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && uploadAvatar(e.target.files[0])}
-                />
 
                 <h1 className="text-xl sm:text-2xl font-bold mb-1">{name}</h1>
                 <p className="text-xs text-gray-400 mb-4">{email}</p>
@@ -316,6 +346,17 @@ export default function ProfileView({ email, displayName, avatarUrl, stats, badg
                     </button>
                 )}
             </div>
+            {/* Avatar picker modal */}
+            {showPicker && (
+                <AvatarPicker
+                    currentUrl={avatar}
+                    uploading={uploading}
+                    onSelect={pickPreloaded}
+                    onUpload={uploadAvatar}
+                    onRemove={removeAvatar}
+                    onClose={() => setShowPicker(false)}
+                />
+            )}
         </main>
     )
 }
