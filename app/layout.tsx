@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import XPToast from "@/components/XPToast";
 import ServiceWorker from "@/components/ServiceWorker";
+import InstallPrompt from '@/components/InstallPrompt'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({
         {children}
         <XPToast />
         <ServiceWorker />
+        <InstallPrompt />
       </body>
     </html>
   );
