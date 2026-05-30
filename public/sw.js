@@ -1,6 +1,15 @@
-const CACHE = "ds-academy-v1";
+const CACHE = "ds-academy-v2";
 
-self.addEventListener("install", (e) => {
+// Don't cache these — always go to network
+const SKIP_CACHE = [
+  "/api/",
+  "supabase.co",
+  "googleapis.com",
+  "groq.com",
+  "cloudflare",
+];
+
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
@@ -9,16 +18,17 @@ self.addEventListener("activate", (e) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(
-          keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)),
-        ),
-      ),
+        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      )
   );
 });
 
-// Network-first for pages, cache fallback when offline
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+
+  const url = e.request.url;
+  if (SKIP_CACHE.some((s) => url.includes(s))) return;
+
   e.respondWith(
     fetch(e.request)
       .then((res) => {
@@ -26,21 +36,19 @@ self.addEventListener("fetch", (e) => {
         caches.open(CACHE).then((c) => c.put(e.request, clone));
         return res;
       })
-      .catch(() => caches.match(e.request)),
+      .catch(() => caches.match(e.request))
   );
 });
-// Handle notification clicks — open the app
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close()
-  const url = event.notification.data?.url || '/dashboard'
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/dashboard";
   event.waitUntil(
-    self.clients.matchAll({ type: 'window' }).then((clientList) => {
-      // Focus existing window if open
+    self.clients.matchAll({ type: "window" }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url.includes(url) && 'focus' in client) return client.focus()
+        if (client.url.includes(url) && "focus" in client) return client.focus();
       }
-      // Otherwise open new
-      if (self.clients.openWindow) return self.clients.openWindow(url)
+      if (self.clients.openWindow) return self.clients.openWindow(url);
     })
-  )
-})
+  );
+});
