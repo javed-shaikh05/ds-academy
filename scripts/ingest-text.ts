@@ -134,7 +134,7 @@ async function main() {
     console.log('🚀 Ingesting text/markdown files...\n')
 
     // List your files here — put them in a `docs/` folder at the project root
-    const files = [
+    const files: string[] = [
         // 'my-notes.md',
         // 'cheatsheet.txt',
         // 'lecture-1.md',
