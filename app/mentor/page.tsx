@@ -12,6 +12,7 @@ import {
 import { showXP } from '@/components/XPToast'
 import MentorAvatar from '@/components/MentorAvatar'
 import { speak, stopSpeaking, pickVoice, isSpeechSupported, getVoices } from '@/lib/voice/speech'
+import ConfirmDialog from '@/components/ConfirmDialog'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -20,12 +21,12 @@ interface Message {
 }
 
 const VOICE: Record<string, { color: string; rate: number; pitch: number }> = {
-  friendly_teacher: { color: '#22d3ee', rate: 1.0, pitch: 1.05 },
-  faang_interviewer: { color: '#f472b6', rate: 1.05, pitch: 0.9 },
-  strict_professor: { color: '#a78bfa', rate: 0.95, pitch: 0.9 },
-  startup_mentor: { color: '#fb923c', rate: 1.1, pitch: 1.0 },
-  ml_researcher: { color: '#34d399', rate: 0.98, pitch: 1.0 },
-  motivational_coach: { color: '#facc15', rate: 1.12, pitch: 1.1 },
+  friendly_teacher: { color: '#22d3ee', rate: 0.95, pitch: 1.0 },  // warm, natural
+  faang_interviewer: { color: '#f472b6', rate: 1.0, pitch: 0.95 },  // crisp, steady
+  strict_professor: { color: '#a78bfa', rate: 0.9, pitch: 0.95 },  // measured
+  startup_mentor: { color: '#fb923c', rate: 1.05, pitch: 1.0 },  // energetic
+  ml_researcher: { color: '#34d399', rate: 0.95, pitch: 1.0 },  // thoughtful
+  motivational_coach: { color: '#facc15', rate: 1.05, pitch: 1.05 },  // upbeat
 }
 
 export default function MentorPage() {
@@ -38,6 +39,7 @@ export default function MentorPage() {
   const [voiceOn, setVoiceOn] = useState(false)
   const [speaking, setSpeaking] = useState(false)
   const [listening, setListening] = useState(false)
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const recognitionRef = useRef<any>(null)
@@ -166,9 +168,9 @@ export default function MentorPage() {
   }
 
   const clearHistory = async () => {
-    if (!confirm('Clear all chat history? This cannot be undone.')) return
     await fetch('/api/chat/history', { method: 'DELETE' })
     setMessages([])
+    setShowClearConfirm(false)
   }
 
   return (
@@ -216,7 +218,7 @@ export default function MentorPage() {
             </button>
             {messages.length > 0 && (
               <button
-                onClick={clearHistory}
+                onClick={() => setShowClearConfirm(true)}
                 className="p-2 rounded-full text-gray-400 hover:text-red-400 hover:bg-white/5 transition"
                 aria-label="Clear chat"
               >
@@ -407,6 +409,16 @@ export default function MentorPage() {
           ) : null}
         </div>
       </div>
+      <ConfirmDialog
+        open={showClearConfirm}
+        title="Clear chat history?"
+        message="This will permanently delete all your messages with this mentor. This cannot be undone."
+        confirmText="Clear chat"
+        cancelText="Keep it"
+        danger
+        onConfirm={clearHistory}
+        onCancel={() => setShowClearConfirm(false)}
+      />
     </main>
   )
 }
