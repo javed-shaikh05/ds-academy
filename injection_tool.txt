@@ -1,0 +1,3 @@
+npx tsx scripts/ingest-docx.ts
+npx tsx scripts/ingest-pdfs.ts
+npx tsx scripts/ingest-url.ts

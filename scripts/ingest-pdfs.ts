@@ -127,7 +127,7 @@ async function main() {
   console.log("🗑  Clearing old embeddings...");
   await supabase.from("embeddings").delete().neq("id", 0);
 
-  const pdfs = ["burkov.pdf", "grus.pdf", "mckinney.pdf"];
+  const pdfs = ["burkov.pdf", "grus.pdf", "mckinney.pdf", "islr.pdf", "mmlbook.pdf", "andrewngcs229.pdf", "bishoppattern.pdf", "dlgoodfellow.pdf", "dtdl.pdf", "mit.pdf", "mlslbygeron.pdf", "thinkstats.pdf", "pds.pdf"];
   for (const pdf of pdfs) {
     await ingestPDF(pdf);
   }
