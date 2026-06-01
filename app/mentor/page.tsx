@@ -7,7 +7,7 @@ import remarkGfm from 'remark-gfm'
 import { MENTORS, MentorId } from '@/lib/ai/personalities'
 import {
   Send, Loader2, ArrowLeft, BookOpen, ChevronDown,
-  Trash2, Volume2, VolumeX, Mic, Square, Sparkles
+  Trash2, Volume2, VolumeX, Mic, Square
 } from 'lucide-react'
 import { showXP } from '@/components/XPToast'
 import MentorAvatar from '@/components/MentorAvatar'
@@ -21,12 +21,12 @@ interface Message {
 }
 
 const VOICE: Record<string, { color: string; rate: number; pitch: number }> = {
-  friendly_teacher: { color: '#22d3ee', rate: 0.95, pitch: 1.0 },  // warm, natural
-  faang_interviewer: { color: '#f472b6', rate: 1.0, pitch: 0.95 },  // crisp, steady
-  strict_professor: { color: '#a78bfa', rate: 0.9, pitch: 0.95 },  // measured
-  startup_mentor: { color: '#fb923c', rate: 1.05, pitch: 1.0 },  // energetic
-  ml_researcher: { color: '#34d399', rate: 0.95, pitch: 1.0 },  // thoughtful
-  motivational_coach: { color: '#facc15', rate: 1.05, pitch: 1.05 },  // upbeat
+  friendly_teacher: { color: '#22d3ee', rate: 0.95, pitch: 1.0 },
+  faang_interviewer: { color: '#f472b6', rate: 1.0, pitch: 0.95 },
+  strict_professor: { color: '#a78bfa', rate: 0.9, pitch: 0.95 },
+  startup_mentor: { color: '#fb923c', rate: 1.05, pitch: 1.0 },
+  ml_researcher: { color: '#34d399', rate: 0.95, pitch: 1.0 },
+  motivational_coach: { color: '#facc15', rate: 1.05, pitch: 1.05 },
 }
 
 export default function MentorPage() {
@@ -40,6 +40,7 @@ export default function MentorPage() {
   const [speaking, setSpeaking] = useState(false)
   const [listening, setListening] = useState(false)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
+
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const recognitionRef = useRef<any>(null)
@@ -47,6 +48,7 @@ export default function MentorPage() {
   const mentor = MENTORS[mentorId]
   const voiceCfg = VOICE[mentorId]
 
+  // ── Load chat history ──
   useEffect(() => {
     fetch('/api/chat/history')
       .then((r) => r.json())
@@ -57,19 +59,33 @@ export default function MentorPage() {
       .catch(() => setHistoryLoading(false))
   }, [])
 
+  // ── Load voices (async in Chrome — poll until ready) ──
   useEffect(() => {
-    if (isSpeechSupported()) {
-      getVoices()
-      window.speechSynthesis.onvoiceschanged = () => getVoices()
+    if (!isSpeechSupported()) return
+
+    getVoices()
+    window.speechSynthesis.onvoiceschanged = () => getVoices()
+
+    const poll = setInterval(() => {
+      const v = getVoices()
+      if (v.length) clearInterval(poll)
+    }, 100)
+
+    const timeout = setTimeout(() => clearInterval(poll), 3000)
+
+    return () => {
+      clearInterval(poll)
+      clearTimeout(timeout)
+      stopSpeaking()
     }
-    return () => stopSpeaking()
   }, [])
 
+  // ── Auto-scroll on new messages ──
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages])
 
-  // Auto-grow textarea
+  // ── Auto-grow textarea ──
   useEffect(() => {
     const ta = textareaRef.current
     if (!ta) return
@@ -77,21 +93,34 @@ export default function MentorPage() {
     ta.style.height = Math.min(ta.scrollHeight, 160) + 'px'
   }, [input])
 
+  // ── Speak reply — retries until voices are loaded ──
   const speakReply = (text: string) => {
     if (!voiceOn) return
-    speak(
-      text,
-      { onStart: () => setSpeaking(true), onEnd: () => setSpeaking(false) },
-      { voice: pickVoice(), rate: voiceCfg.rate, pitch: voiceCfg.pitch }
-    )
+
+    const attempt = (retriesLeft: number) => {
+      const voice = pickVoice()
+      if (!voice && retriesLeft > 0) {
+        setTimeout(() => attempt(retriesLeft - 1), 150)
+        return
+      }
+      speak(
+        text,
+        { onStart: () => setSpeaking(true), onEnd: () => setSpeaking(false) },
+        { voice, rate: voiceCfg.rate, pitch: voiceCfg.pitch }
+      )
+    }
+
+    attempt(6) // up to ~900ms wait
   }
 
+  // ── Send message ──
   const send = async (textOverride?: string) => {
     const text = (textOverride ?? input).trim()
     if (!text || loading) return
 
     stopSpeaking()
     setSpeaking(false)
+
     const userMsg: Message = { role: 'user', content: text }
     const newMessages = [...messages, userMsg]
     setMessages(newMessages)
@@ -132,18 +161,17 @@ export default function MentorPage() {
     }
   }
 
+  // ── Toggle TTS voice on/off ──
   const toggleVoice = () => {
-    if (voiceOn) {
-      stopSpeaking()
-      setSpeaking(false)
-    }
+    if (voiceOn) { stopSpeaking(); setSpeaking(false) }
     setVoiceOn(!voiceOn)
   }
 
+  // ── Start speech recognition ──
   const startListening = () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SR) {
-      alert('Voice input isn\'t supported in this browser. Try Chrome on desktop or Android.')
+      alert("Voice input isn't supported in this browser. Try Chrome on desktop or Android.")
       return
     }
     const rec = new SR()
@@ -167,7 +195,10 @@ export default function MentorPage() {
     setListening(false)
   }
 
+  // ── Clear history ──
   const clearHistory = async () => {
+    stopSpeaking()       // ← stop voice mid-speech immediately
+    setSpeaking(false)
     await fetch('/api/chat/history', { method: 'DELETE' })
     setMessages([])
     setShowClearConfirm(false)
@@ -175,9 +206,12 @@ export default function MentorPage() {
 
   return (
     <main className="flex flex-col h-dvh max-w-4xl mx-auto">
-      {/* ── HEADER ── sticky, glassy, modern ── */}
+
+      {/* ── HEADER ── */}
       <header className="sticky top-0 z-30 border-b border-white/5 bg-black/40 backdrop-blur-xl">
         <div className="flex items-center justify-between px-3 sm:px-5 py-3">
+
+          {/* Back */}
           <Link
             href="/dashboard"
             className="p-2 -ml-2 rounded-full hover:bg-white/5 transition text-gray-400 hover:text-white"
@@ -186,14 +220,13 @@ export default function MentorPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
 
-          {/* Mentor pill in center */}
+          {/* ── Mentor pill — opens picker ── */}
           <button
             onClick={() => setPickerOpen(!pickerOpen)}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition group"
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition"
           >
             <div className="relative">
               <MentorAvatar speaking={speaking} color={voiceCfg.color} size={28} />
-              {/* Online dot */}
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[rgb(8,8,20)]" />
             </div>
             <div className="text-left">
@@ -202,14 +235,16 @@ export default function MentorPage() {
                 {speaking ? 'Speaking...' : listening ? 'Listening...' : 'Online'}
               </p>
             </div>
-            <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition ${pickerOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${pickerOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Right actions */}
           <div className="flex items-center gap-0.5">
             <button
               onClick={toggleVoice}
-              className={`p-2 rounded-full transition ${voiceOn ? 'text-cyan-400 bg-cyan-500/10' : 'text-gray-400 hover:text-white hover:bg-white/5'
+              className={`p-2 rounded-full transition ${voiceOn
+                ? 'text-cyan-400 bg-cyan-500/10'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               aria-label="Toggle voice"
               title={voiceOn ? 'Voice on' : 'Voice off'}
@@ -228,7 +263,7 @@ export default function MentorPage() {
           </div>
         </div>
 
-        {/* Expanded mentor picker (slides down from header) */}
+        {/* ── Mentor picker dropdown ── */}
         {pickerOpen && (
           <div className="border-t border-white/5 px-3 sm:px-5 py-3 bg-black/30">
             <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Switch mentor</p>
@@ -240,7 +275,7 @@ export default function MentorPage() {
                     key={m.id}
                     onClick={() => {
                       if (!isActive) {
-                        setMentorId(m.id)
+                        setMentorId(m.id as MentorId)
                         stopSpeaking()
                         setSpeaking(false)
                       }
@@ -280,8 +315,6 @@ export default function MentorPage() {
             </div>
             <h2 className="text-lg sm:text-xl font-semibold mb-1">Hi, I&apos;m {mentor.name}</h2>
             <p className="text-sm text-gray-400 max-w-sm mb-6">{mentor.tagline}</p>
-
-            {/* Suggestion chips */}
             <div className="flex flex-wrap gap-2 justify-center max-w-md">
               {[
                 'Explain gradient descent simply',
@@ -302,7 +335,7 @@ export default function MentorPage() {
 
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[88%] sm:max-w-[78%] ${m.role === 'user' ? 'order-2' : ''}`}>
+            <div className="max-w-[88%] sm:max-w-[78%]">
               <div
                 className={`px-4 py-2.5 rounded-2xl overflow-hidden ${m.role === 'user'
                   ? 'bg-linear-to-br from-cyan-500/25 to-violet-500/25 border border-cyan-400/30 rounded-br-md'
@@ -347,10 +380,11 @@ export default function MentorPage() {
         )}
       </div>
 
-      {/* ── INPUT BAR ── flat, minimal ── */}
+      {/* ── INPUT BAR ── */}
       <div className="px-3 sm:px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] border-t border-white/5 bg-black/30 backdrop-blur-xl">
         <div className="flex items-end gap-2">
-          {/* Mic button */}
+
+          {/* Mic */}
           <button
             onClick={listening ? stopListening : startListening}
             disabled={loading}
@@ -370,7 +404,7 @@ export default function MentorPage() {
             )}
           </button>
 
-          {/* Textarea — flat, no box, just an underline on focus */}
+          {/* Textarea */}
           <textarea
             ref={textareaRef}
             value={input}
@@ -382,18 +416,14 @@ export default function MentorPage() {
               }
             }}
             placeholder={
-              listening
-                ? 'Listening...'
-                : loading
-                  ? 'Thinking...'
-                  : `Message ${mentor.name}...`
+              listening ? 'Listening...' : loading ? 'Thinking...' : `Message ${mentor.name}...`
             }
             disabled={loading}
             rows={1}
             className="flex-1 bg-transparent resize-none text-sm leading-6 py-2 px-2 focus:outline-none placeholder:text-gray-500 max-h-40 border-b border-transparent focus:border-cyan-400/40 transition"
           />
 
-          {/* Send button — only when there's text */}
+          {/* Send / loading */}
           {input.trim() && !loading ? (
             <button
               onClick={() => send()}
@@ -403,12 +433,14 @@ export default function MentorPage() {
               <Send className="w-4 h-4" />
             </button>
           ) : loading ? (
-            <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="shrink-0 w-10 h-10 flex items-center justify-center">
               <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
             </div>
           ) : null}
         </div>
       </div>
+
+      {/* ── Confirm clear dialog ── */}
       <ConfirmDialog
         open={showClearConfirm}
         title="Clear chat history?"
