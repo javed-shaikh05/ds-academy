@@ -13,10 +13,12 @@ import {
   Dumbbell,
   FileText,
   X,
+  Brain,
 } from "lucide-react";
 import { showXP } from "@/components/XPToast";
 import InlineQuiz from "@/components/InlineQuiz";
 import MiniPlayground from "@/components/MiniPlayground";
+import Flashcards from "@/components/Flashcards";
 
 interface Props {
   subtopic: any;
@@ -40,6 +42,7 @@ export default function LessonView({
   const [cheatSheet, setCheatSheet] = useState("");
   const [cheatLoading, setCheatLoading] = useState(false);
   const [showCheat, setShowCheat] = useState(false);
+  const [showCards, setShowCards] = useState(false);
 
   useEffect(() => {
     if (status === "not_started") {
@@ -154,6 +157,12 @@ export default function LessonView({
           >
             <FileText className="w-3 h-3" /> Cheat sheet
           </button>
+          <button
+            onClick={() => setShowCards(true)}
+            className="text-[10px] sm:text-xs text-green-300 bg-green-500/10 border border-green-400/20 px-2 py-0.5 sm:py-1 rounded-md flex items-center gap-1 hover:bg-green-500/20 transition"
+          >
+            <Brain className="w-3 h-3" /> Flashcards
+          </button>
           <span
             className={`text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-md border ${diffColor}`}
           >
@@ -226,11 +235,10 @@ export default function LessonView({
               )
             }
             disabled={marking}
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition disabled:opacity-50 ${
-              status === "completed"
-                ? "bg-white/5 hover:bg-white/10 border border-white/10"
-                : "bg-linear-to-r from-cyan-500 to-violet-500 hover:opacity-90"
-            }`}
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition disabled:opacity-50 ${status === "completed"
+              ? "bg-white/5 hover:bg-white/10 border border-white/10"
+              : "bg-linear-to-r from-cyan-500 to-violet-500 hover:opacity-90"
+              }`}
           >
             {marking
               ? "..."
@@ -308,6 +316,9 @@ export default function LessonView({
             )}
           </div>
         </div>
+      )}
+      {showCards && (
+        <Flashcards subtopicId={subtopic.id} onClose={() => setShowCards(false)} />
       )}
     </main>
   );

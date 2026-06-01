@@ -15,15 +15,15 @@ export async function POST(req: NextRequest) {
     const { subtopicId } = await req.json();
 
     // 1. Check cache
-   const { data: cached } = await supabase
-  .from('lesson_content')
-  .select('content, sources, exercise')
-  .eq('subtopic_id', subtopicId)
-  .single()
+    const { data: cached } = await supabase
+      .from('lesson_content')
+      .select('content, sources, exercise')
+      .eq('subtopic_id', subtopicId)
+      .single()
 
     if (cached) {
-  return NextResponse.json({ content: cached.content, sources: cached.sources, exercise: cached.exercise || '', cached: true })
-}
+      return NextResponse.json({ content: cached.content, sources: cached.sources, exercise: cached.exercise || '', cached: true })
+    }
 
     // 2. Get subtopic details
     const { data: subtopic } = (await supabase
@@ -56,49 +56,35 @@ export async function POST(req: NextRequest) {
       .join("\n\n---\n\n");
 
     // 4. Generate lesson
-    const prompt = `You are a world-class Data Science teacher creating a lesson for a beginner.
+    const prompt = `You are an electrifying Data Science teacher. Teach "${subtopic.title}" in a way that's impossible to forget. AVOID dry, theoretical, textbook-style writing.
 
-LESSON TOPIC: "${subtopic.title}"
-CONTEXT: This is part of "${topicTitle}" in Phase "${phaseTitle}"
-DIFFICULTY: ${subtopic.difficulty}
+${context ? `Ground your explanation in this source material:\n${context}\n` : ''}
 
-${context ? `REFERENCE MATERIAL FROM TEXTBOOKS:\n${context}\n\n` : ""}
+Write the lesson in markdown with this flow:
 
-Write a complete lesson in markdown with this exact structure:
+## ${subtopic.title}
 
-## 🎯 What you'll learn
-(2-3 bullet points of the key outcomes)
+**🎯 The hook** — Start with ONE punchy sentence or a real-world scenario that makes the reader care. Why does this matter?
 
-## 💡 The Big Idea
-(One paragraph — intuition before formalism. Use a real-world analogy.)
+**💡 The big idea** — Explain the core concept using a concrete ANALOGY or everyday example (not jargon). Make it click.
 
-## 📚 Concept Deep Dive
-(Main content — clear explanation, broken into short paragraphs with **bold key terms**. Use bullet points where appropriate.)
+**🔍 How it actually works** — The real explanation, in plain language. Short paragraphs. Use a relatable example with real numbers if helpful.
 
-## 🔢 Math / Formula
-(If applicable — show the key formula, explain each symbol. Use code blocks for formulas if no LaTeX.)
+**🧠 Remember this** — 2-3 bullet "memory hooks": vivid tricks, analogies, or mini-mnemonics to lock it in.
 
-## 💻 Code Example
-\`\`\`python
-# A short, runnable Python example
-\`\`\`
+**⚠️ Common trap** — The #1 mistake people make, and how to avoid it.
 
-## 🌍 Real-World Use Case
-(One concrete industry example — Netflix, Uber, healthcare, fraud detection, etc.)
+**🎤 Interview angle** — How this shows up in interviews and what a strong answer sounds like.
 
-## ⚠️ Common Pitfalls
-(2-3 mistakes beginners make)
+Rules:
+- Conversational and energetic, like a great teacher who loves the subject.
+- Prefer analogies and examples over abstract definitions.
+- Keep paragraphs SHORT. No walls of text.
+- Around 350-450 words. Dense with insight, light on fluff.`
 
-## 🎯 Interview Perspective
-(What a FAANG interviewer might ask + a tip on how to answer)
 
-## 🧠 Quick Recap
-(3 bullet points — the key takeaways)
-
-Tone: friendly, clear, no jargon without explanation. Keep total length around 500-700 words. Use the textbook reference material when relevant.`;
-
- // Generate lesson + exercise in ONE call to save quota
-const fullPrompt = `${prompt}
+    // Generate lesson + exercise in ONE call to save quota
+    const fullPrompt = `${prompt}
 
 ---
 
@@ -108,35 +94,35 @@ After the lesson, add a practice exercise. Output your response as JSON ONLY (no
   "exercise": "<a short 10-15 line beginner Python exercise using only numpy/pandas, with a TODO comment for the learner. If this topic isn't suited to code, use empty string>"
 }`
 
-const raw = await generateWithRetry({ prompt: fullPrompt, jsonMode: true })
+    const raw = await generateWithRetry({ prompt: fullPrompt, jsonMode: true })
 
-let content = ''
-let exercise = ''
-try {
-  let cleaned = raw.replace(/```json\s*/gi, '').replace(/```/g, '').trim()
-  const fb = cleaned.indexOf('{'); const lb = cleaned.lastIndexOf('}')
-  if (fb !== -1) cleaned = cleaned.slice(fb, lb + 1)
-  const parsed = JSON.parse(cleaned)
-  content = parsed.lesson || raw
-  exercise = parsed.exercise || ''
-} catch {
-  // If JSON parsing fails, treat the whole thing as the lesson
-  content = raw
-}
+    let content = ''
+    let exercise = ''
+    try {
+      let cleaned = raw.replace(/```json\s*/gi, '').replace(/```/g, '').trim()
+      const fb = cleaned.indexOf('{'); const lb = cleaned.lastIndexOf('}')
+      if (fb !== -1) cleaned = cleaned.slice(fb, lb + 1)
+      const parsed = JSON.parse(cleaned)
+      content = parsed.lesson || raw
+      exercise = parsed.exercise || ''
+    } catch {
+      // If JSON parsing fails, treat the whole thing as the lesson
+      content = raw
+    }
 
-const sources = goodMatches.map((m: any) => ({
-  source: m.source,
-  similarity: Math.round(m.similarity * 100),
-}))
+    const sources = goodMatches.map((m: any) => ({
+      source: m.source,
+      similarity: Math.round(m.similarity * 100),
+    }))
 
-await supabase.from('lesson_content').insert({
-  subtopic_id: subtopicId,
-  content,
-  sources,
-  exercise,
-})
+    await supabase.from('lesson_content').insert({
+      subtopic_id: subtopicId,
+      content,
+      sources,
+      exercise,
+    })
 
-return NextResponse.json({ content, sources, exercise, cached: false })
+    return NextResponse.json({ content, sources, exercise, cached: false })
   } catch (err: any) {
     console.error("Lesson generation error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
