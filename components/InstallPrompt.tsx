@@ -17,12 +17,15 @@ export default function InstallPrompt() {
         if (window.matchMedia('(display-mode: standalone)').matches) return
         if ((window.navigator as any).standalone) return // iOS
 
-        // Detect iOS (it doesn't fire beforeinstallprompt)
+        // Only show on the dashboard — not on every page
+        if (window.location.pathname !== '/dashboard') return
+
+        // Detect iOS
         const ua = window.navigator.userAgent
         const iOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream
         setIsIOS(iOS)
 
-        // Recently dismissed? Don't show.
+        // Recently dismissed OR already installed before? Don't show.
         const dismissed = localStorage.getItem(DISMISSED_KEY)
         if (dismissed) {
             const daysSince = (Date.now() - parseInt(dismissed, 10)) / 86400000
@@ -31,15 +34,16 @@ export default function InstallPrompt() {
 
         // Android / desktop Chrome path
         const handler = (e: any) => {
-            e.preventDefault() // stop browser's automatic prompt
+            e.preventDefault()
             setInstallEvent(e)
-            setShowBanner(true)
+            // Wait 5s before showing — let the user settle into the app first
+            setTimeout(() => setShowBanner(true), 5000)
         }
         window.addEventListener('beforeinstallprompt', handler)
 
-        // iOS path — show after a short delay (since no event fires)
+        // iOS path — show after a longer delay (no event fires)
         if (iOS) {
-            const t = setTimeout(() => setShowBanner(true), 3000)
+            const t = setTimeout(() => setShowBanner(true), 8000)
             return () => clearTimeout(t)
         }
 

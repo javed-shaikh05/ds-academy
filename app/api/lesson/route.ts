@@ -56,31 +56,39 @@ export async function POST(req: NextRequest) {
       .join("\n\n---\n\n");
 
     // 4. Generate lesson
-    const prompt = `You are an electrifying Data Science teacher. Teach "${subtopic.title}" in a way that's impossible to forget. AVOID dry, theoretical, textbook-style writing.
+    const prompt = `You are the friendliest teacher alive. Explain "${subtopic.title}" to someone who is COMPLETELY new — imagine a smart 12-year-old or a person with zero tech background. Your goal: make them understand and remember it easily, with NO confusion.
 
-${context ? `Ground your explanation in this source material:\n${context}\n` : ''}
+${context ? `You may use this reference material, but translate it into super simple language:\n${context}\n` : ''}
 
-Write the lesson in markdown with this flow:
+Write in markdown with this flow:
 
 ## ${subtopic.title}
 
-**🎯 The hook** — Start with ONE punchy sentence or a real-world scenario that makes the reader care. Why does this matter?
+**🌟 What is it, really?**
+Start with a everyday-life analogy a child would get. (Example style: "Imagine sorting your laundry into whites and colors — that's basically classification.") One simple idea first.
 
-**💡 The big idea** — Explain the core concept using a concrete ANALOGY or everyday example (not jargon). Make it click.
+**🧒 Explain like I'm new**
+Now explain the actual concept in the simplest words possible. Pretend you're talking to a friend over coffee. Short sentences. No jargon.
 
-**🔍 How it actually works** — The real explanation, in plain language. Short paragraphs. Use a relatable example with real numbers if helpful.
+**📦 A real example**
+Walk through ONE concrete, relatable example step by step. Use familiar things (shopping, food, movies, sports — not abstract math).
 
-**🧠 Remember this** — 2-3 bullet "memory hooks": vivid tricks, analogies, or mini-mnemonics to lock it in.
+**🧠 Easy way to remember**
+2-3 simple memory tricks, analogies, or one-liners that make it stick.
 
-**⚠️ Common trap** — The #1 mistake people make, and how to avoid it.
+**⚠️ Don't get confused**
+Clear up the ONE thing beginners usually mix up, in plain words.
 
-**🎤 Interview angle** — How this shows up in interviews and what a strong answer sounds like.
+**🎤 If someone asks you**
+In one or two simple sentences, how you'd explain this if asked in an interview or exam.
 
-Rules:
-- Conversational and energetic, like a great teacher who loves the subject.
-- Prefer analogies and examples over abstract definitions.
-- Keep paragraphs SHORT. No walls of text.
-- Around 350-450 words. Dense with insight, light on fluff.`
+STRICT RULES:
+- Use ONLY everyday words. If you must use a technical term, immediately explain it in brackets like this: "a model (think of it as a smart guesser)".
+- NO complex math symbols or formulas unless absolutely necessary — and if used, explain in words.
+- Short sentences. Short paragraphs. Lots of white space.
+- Warm, encouraging, slightly fun tone.
+- Around 300-400 words. Simple beats long.
+- Every example must be from EVERYDAY LIFE, not abstract or academic.`
 
 
     // Generate lesson + exercise in ONE call to save quota
