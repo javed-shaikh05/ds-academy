@@ -80,4 +80,5 @@ export const XP_REWARDS = {
   project_review: 60,
   resume_review: 40,
   exam_complete: 80,
+  intern_project: 100,
 };

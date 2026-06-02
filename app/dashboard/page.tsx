@@ -22,6 +22,7 @@ import {
   FileText,
   Network,
   GraduationCap,
+  Briefcase,
 } from "lucide-react";
 import { getRank, progressToNextLevel } from "@/lib/gamification/levels";
 import { BADGES } from "@/lib/gamification/badges";
@@ -220,6 +221,14 @@ export default async function Dashboard() {
             title="Exam"
             desc="Timed test"
             gradient="from-violet-500/20"
+            ready
+          />
+          <ActionCard
+            href="/intern"
+            icon={Briefcase}
+            title="Intern Lab"
+            desc="Real datasets"
+            gradient="from-cyan-500/20"
             ready
           />
         </div>
