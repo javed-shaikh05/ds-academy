@@ -8,6 +8,7 @@ interface GenerateOptions {
   contents?: any[]
   systemInstruction?: any
   jsonMode?: boolean
+  temperature?: number
 }
 
 // ── Groq fallback (free, high limits) ──
@@ -38,6 +39,7 @@ async function groqGenerate(opts: GenerateOptions): Promise<string> {
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
       messages,
+      ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
       ...(opts.jsonMode ? { response_format: { type: 'json_object' } } : {}),
     }),
   })
@@ -59,7 +61,10 @@ async function geminiGenerate(opts: GenerateOptions): Promise<string> {
           contents: opts.contents || [{ role: 'user', parts: [{ text: opts.prompt }] }],
         }
         if (opts.systemInstruction) config.systemInstruction = opts.systemInstruction
-        if (opts.jsonMode) config.generationConfig = { responseMimeType: 'application/json' }
+        const genConfig: any = {}
+        if (opts.jsonMode) genConfig.responseMimeType = 'application/json'
+        if (opts.temperature !== undefined) genConfig.temperature = opts.temperature
+        if (Object.keys(genConfig).length) config.generationConfig = genConfig
 
         const result = await model.generateContent(config)
         return result.response.text()

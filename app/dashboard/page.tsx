@@ -21,6 +21,7 @@ import {
   FileCode,
   FileText,
   Network,
+  GraduationCap,
 } from "lucide-react";
 import { getRank, progressToNextLevel } from "@/lib/gamification/levels";
 import { BADGES } from "@/lib/gamification/badges";
@@ -211,6 +212,14 @@ export default async function Dashboard() {
             title="Resume"
             desc="AI review & ATS score"
             gradient="from-orange-500/20"
+            ready
+          />
+          <ActionCard
+            href="/exam"
+            icon={GraduationCap}
+            title="Exam"
+            desc="Timed test"
+            gradient="from-violet-500/20"
             ready
           />
         </div>
